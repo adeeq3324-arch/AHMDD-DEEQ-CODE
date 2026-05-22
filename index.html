@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="theme-color" content="#070d1a"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Phone Finder"/>
+<meta name="description" content="Telefoonkaaga raadi - GPS, Network, Battery"/>
+<title>📡 Phone Finder</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@600;700&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+
+<style>
+:root{
+  --bg:#070d1a;--card:#0e1628;--border:#162030;
+  --accent:#00e5ff;--accent2:#7c3aed;
+  --green:#00e676;--orange:#ff9100;--danger:#ff1744;
+  --text:#e8f4f8;--muted:#5a7a8a;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;overscroll-behavior:none}
+body{overflow-x:hidden}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--accent)44;border-radius:3px}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes ripple{0%{transform:scale(.8);opacity:1}100%{transform:scale(2.6);opacity:0}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes scanDown{0%{top:-2px}100%{top:100%}}
+@keyframes glow{0%,100%{box-shadow:0 0 15px var(--accent)22}50%{box-shadow:0 0 30px var(--accent)55}}
+
+/* HEADER */
+.header{
+  position:sticky;top:0;z-index:100;
+  background:linear-gradient(135deg,var(--card),#080f1c);
+  border-bottom:1px solid var(--border);
+  padding:12px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  flex-shrink:0;
+}
+.logo-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:16px;color:var(--accent);letter-spacing:2px}
+.logo-sub{font-size:9px;color:var(--muted);letter-spacing:1px}
+.logout-btn{
+  background:transparent;border:1px solid var(--danger)44;
+  color:var(--danger);padding:6px 12px;border-radius:8px;
+  cursor:pointer;font-size:11px;font-weight:700;font-family:'Exo 2',sans-serif;
+}
+
+/* CONTAINER */
+.container{max-width:460px;margin:0 auto;padding:16px 12px 40px}
+
+/* AUTH BOX */
+.auth-box{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:20px;padding:24px;animation:fadeUp .4s ease;
+}
+.auth-head{text-align:center;margin-bottom:22px}
+.auth-icon{font-size:44px;margin-bottom:8px}
+.auth-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:22px;color:var(--accent);letter-spacing:2px}
+.auth-sub{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* FORM */
+.field{margin-bottom:14px}
+.field label{font-size:10px;color:var(--muted);letter-spacing:1px;display:block;margin-bottom:5px;font-weight:700}
+.field input{
+  width:100%;padding:11px 14px;
+  background:rgba(22,32,48,.8);border:1px solid var(--border);
+  border-radius:10px;color:var(--text);font-size:15px;
+  font-family:'Exo 2',sans-serif;transition:border-color .2s,background .2s;
+  -webkit-appearance:none;
+}
+.field input:focus{outline:none;border-color:var(--accent);background:rgba(0,229,255,.04)}
+.field input::placeholder{color:var(--muted)}
+
+/* BUTTON */
+.btn{
+  width:100%;padding:13px;margin-bottom:4px;
+  background:linear-gradient(135deg,rgba(0,229,255,.12),rgba(0,229,255,.22));
+  border:1px solid rgba(0,229,255,.4);color:var(--accent);
+  border-radius:12px;font-size:13px;font-weight:700;
+  cursor:pointer;letter-spacing:.8px;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  font-family:'Exo 2',sans-serif;transition:all .2s;
+  -webkit-appearance:none;
+}
+.btn:active{transform:scale(.98)}
+.btn.green{background:linear-gradient(135deg,rgba(0,230,118,.1),rgba(0,230,118,.2));border-color:rgba(0,230,118,.4);color:var(--green)}
+.btn.danger{background:linear-gradient(135deg,rgba(255,23,68,.1),rgba(255,23,68,.2));border-color:rgba(255,23,68,.4);color:var(--danger)}
+.btn.purple{background:linear-gradient(135deg,rgba(124,58,237,.1),rgba(124,58,237,.2));border-color:rgba(124,58,237,.4);color:var(--accent2)}
+.btn.muted{background:rgba(22,32,48,.8);border-color:var(--border);color:var(--muted);font-size:11px;padding:8px 14px;width:auto}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-row{display:flex;gap:8px;margin-top:10px}
+
+/* ALERT */
+.alert{padding:9px 13px;border-radius:9px;font-size:12px;margin-bottom:12px;animation:fadeUp .3s ease;line-height:1.5}
+.alert.err{background:rgba(255,23,68,.08);border:1px solid rgba(255,23,68,.3);color:var(--danger)}
+.alert.ok{background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.3);color:var(--green)}
+.alert.info{background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.3);color:var(--accent)}
+
+/* SWITCH LINK */
+.switch-link{text-align:center;margin-top:14px;font-size:12px;color:var(--muted)}
+.switch-link span{color:var(--accent);cursor:pointer;font-weight:700}
+
+/* CARD */
+.card{
+  background:var(--card);border-radius:16px;padding:18px;
+  margin-bottom:14px;animation:fadeUp .4s ease;
+  border:1px solid var(--border);
+}
+.card-head{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.card-icon{font-size:15px}
+.card-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;letter-spacing:1.5px}
+.card-title.green{color:var(--green)}
+.card-title.accent{color:var(--accent)}
+.card-title.purple{color:var(--accent2)}
+.card-title.danger{color:var(--danger)}
+
+/* INFO ROW */
+.info-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:7px 0;border-bottom:1px solid var(--border);
+}
+.info-row:last-child{border-bottom:none}
+.info-label{font-size:11px;color:var(--muted);flex-shrink:0}
+.info-val{font-size:12px;font-weight:600;max-width:60%;text-align:right;word-break:break-all}
+.info-val.mono{font-family:'Share Tech Mono',monospace}
+.info-val.green{color:var(--green)}
+.info-val.accent{color:var(--accent)}
+.info-val.orange{color:var(--orange)}
+.info-val.danger{color:var(--danger)}
+.info-val.muted{color:var(--muted)}
+
+/* GPS BOX */
+.gps-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.15);
+  border-radius:12px;padding:14px;margin-bottom:10px;
+}
+.gps-cell .gk{font-size:9px;color:var(--muted);letter-spacing:.5px;margin-bottom:2px}
+.gps-cell .gv{font-size:12px;font-weight:600;font-family:'Share Tech Mono',monospace}
+
+/* MAP BUTTONS */
+.map-btns{display:flex;gap:8px;margin-bottom:10px}
+.map-btn{
+  flex:1;display:block;text-align:center;padding:9px 0;
+  border-radius:10px;font-size:12px;font-weight:700;
+  text-decoration:none;transition:opacity .2s;
+}
+.map-btn:active{opacity:.7}
+.map-btn.gmap{background:rgba(0,230,118,.12);border:1px solid rgba(0,230,118,.35);color:var(--green)}
+.map-btn.amap{background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.35);color:var(--accent)}
+
+/* RADAR DOT */
+.radar-wrap{position:relative;width:14px;height:14px;flex-shrink:0}
+.radar-dot{width:14px;height:14px;border-radius:50%;position:absolute}
+.radar-ring{width:14px;height:14px;border-radius:50%;position:absolute;animation:ripple 1.5s infinite}
+
+/* BATTERY BAR */
+.bat-row{display:flex;align-items:center;gap:8px;margin:8px 0}
+.bat-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.bat-fill{height:100%;border-radius:4px;transition:width .5s}
+.bat-val{font-family:'Share Tech Mono',monospace;font-size:12px;min-width:44px}
+
+/* USER BANNER */
+.user-banner{
+  background:linear-gradient(135deg,rgba(0,229,255,.06),rgba(124,58,237,.06));
+  border:1px solid rgba(0,229,255,.15);border-radius:16px;
+  padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:14px;
+  animation:fadeUp .4s ease;
+}
+.user-ava{
+  width:46px;height:46px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+.user-info{flex:1;min-width:0}
+.user-name{font-weight:700;font-size:15px}
+.user-meta{font-size:11px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.status-box{text-align:center;flex-shrink:0}
+.status-label{font-size:9px;font-weight:700;letter-spacing:.5px;margin-top:5px}
+
+/* RECOVER */
+.recover-toggle{
+  display:flex;justify-content:space-between;align-items:center;
+  cursor:pointer;padding:4px 0;
+}
+.recover-toggle span{font-size:12px;font-weight:700;color:var(--danger)}
+.recover-result{
+  margin-top:14px;background:rgba(255,23,68,.06);
+  border:1px solid rgba(255,23,68,.2);border-radius:12px;padding:16px;
+  animation:fadeUp .3s ease;
+}
+.recover-gps{
+  background:rgba(0,230,118,.06);border-radius:10px;
+  padding:12px;margin:10px 0;
+}
+.recover-gps .rk{font-size:10px;color:var(--muted);margin-bottom:5px;letter-spacing:.5px}
+.recover-gps .rv{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--green)}
+.recover-gps .ra{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* FOOTER NOTE */
+.footnote{text-align:center;font-size:10px;color:var(--muted);padding:6px 0 24px;line-height:1.9}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:10px 0}
+
+/* LOADING SPINNER */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+
+/* SCANNING LINE */
+.scan-wrap{position:relative;overflow:hidden;border-radius:12px}
+.scan-line{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);animation:scanDown 2s linear infinite;pointer-events:none;z-index:2}
+
+/* INSTALL BANNER */
+.install-banner{
+  background:linear-gradient(135deg,rgba(0,230,118,.1),rgba(0,229,255,.08));
+  border:1px solid rgba(0,230,118,.3);border-radius:14px;
+  padding:14px;margin-bottom:14px;animation:fadeUp .5s ease;
+}
+.install-banner h3{font-size:13px;color:var(--green);font-weight:700;margin-bottom:6px}
+.install-steps{font-size:11px;color:var(--muted);line-height:1.9;padding-left:4px}
+.install-steps b{color:var(--text)}
+
+/* BG GLOW */
+.glow1,.glow2{position:fixed;border-radius:50%;pointer-events:none;z-index:0}
+.glow1{top:15%;right:-80px;width:250px;height:250px;background:radial-gradient(circle,rgba(0,229,255,.04),transparent 70%)}
+.glow2{bottom:10%;left:-80px;width:220px;height:220px;background:radial-gradient(circle,rgba(124,58,237,.04),transparent 70%)}
+.container{position:relative;z-index:1}
+</style>
+</head>
+<body>
+
+<div class="glow1"></div>
+<div class="glow2"></div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">📡</div>
+    <div>
+      <div class="logo-title">PHONE FINDER</div>
+      <div class="logo-sub">LIVE TRACKER v2.0</div>
+    </div>
+  </div>
+  <button class="logout-btn" id="logoutBtn" style="display:none" onclick="logout()">KA BAX</button>
+</div>
+
+<div class="container">
+  <!-- AUTH -->
+  <div id="authBox"></div>
+  <!-- DASHBOARD -->
+  <div id="dashboard" style="display:none"></div>
+</div>
+
+<script>
+// ── DB ────────────────────────────────────────────────────────
+const DB = {
+  getUsers(){ return JSON.parse(localStorage.getItem('pf_users')||'[]') },
+  saveUser(u){
+    const all=this.getUsers();
+    const i=all.findIndex(x=>x.email===u.email);
+    i>=0?all[i]=u:all.push(u);
+    localStorage.setItem('pf_users',JSON.stringify(all));
+  },
+  find(email){ return this.getUsers().find(u=>u.email===email) },
+  saveSnap(email,snap){
+    const all=JSON.parse(localStorage.getItem('pf_snaps')||'{}');
+    all[email]={...snap,ts:new Date().toISOString()};
+    localStorage.setItem('pf_snaps',JSON.stringify(all));
+  },
+  getSnap(email){
+    return (JSON.parse(localStorage.getItem('pf_snaps')||'{}')||{})[email]||null;
+  }
+};
+
+// ── STATE ─────────────────────────────────────────────────────
+let currentUser=null;
+let watchId=null;
+let autoTimer=null;
+let autoOn=false;
+let currentSnap=null;
+let currentDevInfo=null;
+let page='login';
+
+// ── HELPERS ───────────────────────────────────────────────────
+function fmt(iso){ return iso?new Date(iso).toLocaleString('so-SO'):'—' }
+function getBrowser(){
+  const ua=navigator.userAgent;
+  if(ua.includes('Chrome')&&!ua.includes('Edg')&&!ua.includes('OPR'))return'Chrome';
+  if(ua.includes('Firefox'))return'Firefox';
+  if(ua.includes('Safari')&&!ua.includes('Chrome'))return'Safari';
+  if(ua.includes('Edg'))return'Edge';
+  return'Kale';
+}
+function getDevType(){
+  const ua=navigator.userAgent;
+  if(/tablet|ipad/i.test(ua))return'Tablet 📱';
+  if(/mobile|android|iphone/i.test(ua))return'Mobile 📱';
+  return'Desktop 🖥️';
+}
+function getConn(){
+  const c=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+  if(!c)return{type:'—',effectiveType:'—',downlink:null,rtt:null,saveData:false};
+  return{type:c.type||'—',effectiveType:c.effectiveType||'—',downlink:c.downlink,rtt:c.rtt,saveData:c.saveData};
+}
+function netLabel(info){
+  const t=info.connection.type, et=info.connection.effectiveType;
+  if(t==='wifi')return'📡 WiFi';
+  if(et==='4g')return'📶 4G / LTE';
+  if(et==='3g')return'📶 3G';
+  if(et==='2g')return'📶 2G';
+  return et||t||'—';
+}
+function infoRow(label,val,cls=''){
+  return`<div class="info-row"><span class="info-label">${label}</span><span class="info-val ${cls}">${val||'—'}</span></div>`;
+}
+function alert2(msg,type='err'){
+  return`<div class="alert ${type}">${msg}</div>`;
+}
+
+// ── GATHER DEVICE INFO ────────────────────────────────────────
+async function gatherDeviceInfo(){
+  const nav2=navigator;
+  const info={
+    platform:nav2.platform||'—',
+    browser:getBrowser(),
+    language:nav2.language||'—',
+    cookiesEnabled:nav2.cookieEnabled,
+    onLine:nav2.onLine,
+    screenW:window.screen.width,
+    screenH:window.screen.height,
+    pixelRatio:window.devicePixelRatio||1,
+    deviceType:getDevType(),
+    timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,
+    connection:getConn(),
+    battery:null,
+    ip:null,isp:null,city:null,country:null,region:null
+  };
+  try{
+    if(nav2.getBattery){
+      const b=await nav2.getBattery();
+      info.battery={level:Math.round(b.level*100),charging:b.charging,dischargingTime:b.dischargingTime};
+    }
+  }catch(_){}
+  try{
+    const r=await fetch('https://ipapi.co/json/');
+    if(r.ok){const d=await r.json();info.ip=d.ip;info.isp=d.org;info.city=d.city;info.country=d.country_name;info.region=d.region;}
+  }catch(_){}
+  return info;
+}
+
+// ── RENDER AUTH ───────────────────────────────────────────────
+function renderAuth(){
+  document.getElementById('logoutBtn').style.display='none';
+  document.getElementById('dashboard').style.display='none';
+  const box=document.getElementById('authBox');
+  if(page==='login'){
+    box.innerHTML=`
+    <div class="auth-box">
+      <div class="auth-head">
+        <div class="auth-icon">🔓</div>
+        <div class="auth-title">KU GALI</div>
+        <div class="auth-sub">Soo gal akoonkaaga</div>
+      </div>
+      <div id="authAlert"></div>
+      <div class="field"><label>✉️ EMAIL</label><input type="email" id="aEmail" placeholder="magac@gmail.com" autocomplete="email"/></div>
+      <div class="field"><label>🔐 FURAHA SIRTA</label><input type="password" id="aPass" placeholder="••••••••" autocomplete="current-password"/></div>
+      <button class="btn" onclick="doLogin()">→ KU GALI</button>
+      <div class="switch-link">Akoon ma lihid? <span onclick="switchPage()">Diiwaan Geli</span></div>
+    </div>`;
+  } else {
+    box.innerHTML=`
+    <div class="auth-box">
+      <div class="auth-head">
+        <div class="auth-icon">📱</div>
+        <div class="auth-title">DIIWAAN GELI</div>
+        <div class="auth-sub">Abuur akoon si aad telefoonkaaga u ilaaliso</div>
+      </div>
+      <div id="authAlert"></div>
+      <div class="field"><label>👤 MAGACAAGA BUUXA</label><input type="text" id="rName" placeholder="Magacaaga" autocomplete="name"/></div>
+      <div class="field"><label>📞 NAMBARKA SIM</label><input type="tel" id="rPhone" placeholder="+252 61 234 5678" autocomplete="tel"/></div>
+      <div class="field"><label>✉️ EMAIL</label><input type="email" id="rEmail" placeholder="magac@gmail.com" autocomplete="email"/></div>
+      <div class="field"><label>🔐 FURAHA SIRTA</label><input type="password" id="rPass" placeholder="••••••••" autocomplete="new-password"/></div>
+      <button class="btn" onclick="doRegister()">→ DIIWAAN GELI</button>
+      <div class="switch-link">Akoon ma leedahay? <span onclick="switchPage()">Gal</span></div>
+    </div>`;
+  }
+}
+
+function switchPage(){ page=page==='login'?'register':'login'; renderAuth(); }
+
+function showAuthAlert(msg,type='err'){
+  document.getElementById('authAlert').innerHTML=alert2(msg,type);
+}
+
+function doLogin(){
+  const email=(document.getElementById('aEmail').value||'').trim();
+  const pass=document.getElementById('aPass').value||'';
+  if(!email||!pass)return showAuthAlert('Email iyo furaha geli');
+  const u=DB.find(email);
+  if(!u||u.pass!==pass)return showAuthAlert('Email ama furaha waa khalad');
+  currentUser=u;
+  renderDashboard();
+}
+
+function doRegister(){
+  const name=(document.getElementById('rName').value||'').trim();
+  const phone=(document.getElementById('rPhone').value||'').trim();
+  const email=(document.getElementById('rEmail').value||'').trim();
+  const pass=document.getElementById('rPass').value||'';
+  if(!name||!phone||!email||!pass)return showAuthAlert('Dhammaan meelaha buuxi');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return showAuthAlert('Email-ka saxda ah geli');
+  if(phone.replace(/\D/g,'').length<7)return showAuthAlert('Nambarka telefoonka gaaban');
+  if(DB.find(email))return showAuthAlert('Email-kan waa la isticmaalay hore');
+  const u={name,phone,email,pass,createdAt:new Date().toISOString()};
+  DB.saveUser(u); currentUser=u;
+  renderDashboard();
+}
+
+// ── RENDER DASHBOARD ──────────────────────────────────────────
+function renderDashboard(){
+  document.getElementById('authBox').innerHTML='';
+  document.getElementById('logoutBtn').style.display='block';
+  const dash=document.getElementById('dashboard');
+  dash.style.display='block';
+
+  const snap=DB.getSnap(currentUser.email);
+  if(snap) currentSnap=snap;
+
+  dash.innerHTML=`
+  <!-- Install banner (shown first time) -->
+  <div class="install-banner" id="installBanner">
+    <h3>📲 App-ka Phone-kaaga Ku Rakib</h3>
+    <div class="install-steps">
+      <b>1.</b> Chrome-ka menu-ga fur (⋮ saddexda dhibic)<br>
+      <b>2.</b> "Add to Home screen" ama "Install app" riix<br>
+      <b>3.</b> "Add" riix — icon-ku desktop-kaaga ku soo baxa<br>
+      <b>4.</b> Hadda app ahaan ayuu u furmaa! ✅
+    </div>
+  </div>
+
+  <!-- User Banner -->
+  <div class="user-banner">
+    <div class="user-ava">👤</div>
+    <div class="user-info">
+      <div class="user-name">${currentUser.name}</div>
+      <div class="user-meta">📞 ${currentUser.phone}</div>
+      <div class="user-meta">✉️ ${currentUser.email}</div>
+    </div>
+    <div class="status-box">
+      <div class="radar-wrap" id="radarWrap">
+        <div class="radar-dot" id="radarDot" style="background:var(--muted)"></div>
+      </div>
+      <div class="status-label" id="statusLabel" style="color:var(--muted)">DIYAAR</div>
+    </div>
+  </div>
+
+  <!-- GPS -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">📍</span><span class="card-title green">GOOBTA HADDA — LIVE GPS</span></div>
+    <div id="gpsAlert"></div>
+    <div id="gpsBody">${renderGpsBody()}</div>
+    <button class="btn green" onclick="startGPS()" id="gpsBtn">📡 GPS DIYAARI / CUSBOONAYSII</button>
+  </div>
+
+  <!-- Network -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">📶</span><span class="card-title accent">NETWORK — SIM — IP</span></div>
+    <div id="netBody"><div style="text-align:center;color:var(--muted);font-size:12px;animation:pulse 1s infinite">La soo qaadayaa...</div></div>
+  </div>
+
+  <!-- Device -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">📱</span><span class="card-title purple">XOGTA DEVICE-KA</span></div>
+    <div id="devBody"><div style="text-align:center;color:var(--muted);font-size:12px;animation:pulse 1s infinite">La soo qaadayaa...</div></div>
+    <div class="btn-row">
+      <button class="btn purple" onclick="reloadDevInfo()">🔄 CUSBOONAYSII</button>
+      <button class="btn muted" id="autoBtn" onclick="toggleAuto()">▶ AUTO 30s</button>
+    </div>
+  </div>
+
+  <!-- Recover -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">🔍</span><span class="card-title danger">TELEFOON LUMAY — RAADI</span></div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.7">
+      Haddii telefoonkaagu lumay, telefoon kale ku geli emailkaaga. App-ka wuxuu ku siin doonaa GPS, IP, ISP, battery iyo nambarka SIM-ka.
+    </p>
+    <div class="recover-toggle" onclick="toggleRecover()">
+      <span id="recoverToggleLabel">▼ Fur — Goobta Soo Qaad</span>
+    </div>
+    <div id="recoverPanel" style="display:none;margin-top:14px;animation:fadeUp .3s ease">
+      <div id="recoverAlert"></div>
+      <div class="field"><label>📧 EMAILKAAGA</label><input type="email" id="recEmail" placeholder="magacaaga@gmail.com"/></div>
+      <button class="btn danger" onclick="doRecover()">🔍 XOGTA SOO BIXI</button>
+      <div id="recoverResult"></div>
+    </div>
+  </div>
+
+  <div class="footnote">
+    🔒 Xogta device-kaaga kaliya ayaa lagu kaydiyaa<br>
+    GPS live · IP address · ISP · Battery · SIM Network
+  </div>`;
+
+  // Start GPS silently + load device info
+  startGPS(true);
+  loadDeviceInfo();
+}
+
+function renderGpsBody(){
+  if(!currentSnap) return`<div style="text-align:center;padding:18px 0;color:var(--muted);font-size:13px">Goob wali la helin — badhanka hoos riix</div>`;
+  const s=currentSnap;
+  const acc=s.accuracy<50?'green':'orange';
+  let extra='';
+  if(s.altitude!=null) extra+=`<div class="gps-cell"><div class="gk">ALTITUDE</div><div class="gv" style="color:var(--muted)">${s.altitude}m</div></div>`;
+  if(s.speed!=null) extra+=`<div class="gps-cell"><div class="gk">XAWAARAHA</div><div class="gv" style="color:var(--orange)">${(s.speed*3.6).toFixed(1)} km/h</div></div>`;
+  return`
+  <div class="scan-wrap">
+    <div class="scan-line"></div>
+    <div class="gps-grid">
+      <div class="gps-cell"><div class="gk">LATITUDE</div><div class="gv" style="color:var(--green)">${s.lat.toFixed(7)}</div></div>
+      <div class="gps-cell"><div class="gk">LONGITUDE</div><div class="gv" style="color:var(--green)">${s.lng.toFixed(7)}</div></div>
+      <div class="gps-cell"><div class="gk">SAXNAAN</div><div class="gv" style="color:var(--${acc})">±${s.accuracy}m</div></div>
+      <div class="gps-cell"><div class="gk">WAKHTIGA</div><div class="gv" style="color:var(--accent);font-size:10px">${fmt(s.ts)}</div></div>
+      ${extra}
+    </div>
+  </div>
+  <div class="map-btns" style="margin-top:10px">
+    <a class="map-btn gmap" href="https://www.google.com/maps?q=${s.lat},${s.lng}" target="_blank">🗺️ Google Maps</a>
+    <a class="map-btn amap" href="https://maps.apple.com/?q=${s.lat},${s.lng}" target="_blank">🍎 Apple Maps</a>
+  </div>`;
+}
+
+function setRadar(status){
+  const dot=document.getElementById('radarDot');
+  const ring=document.getElementById('radarWrap');
+  const lbl=document.getElementById('statusLabel');
+  if(!dot||!lbl)return;
+  const map={
+    idle:{col:'var(--muted)',label:'DIYAAR',ring:false},
+    tracking:{col:'var(--orange)',label:'RAADINTA...',ring:false},
+    ok:{col:'var(--green)',label:'LIVE ✓',ring:true},
+    error:{col:'var(--danger)',label:'KHALAD',ring:false}
+  }[status]||{col:'var(--muted)',label:'—',ring:false};
+  dot.style.background=map.col;
+  lbl.style.color=map.col;
+  lbl.textContent=map.label;
+  lbl.style.animation=status==='tracking'?'blink 1s infinite':'none';
+  // ring
+  let existing=ring.querySelector('.radar-ring');
+  if(map.ring&&!existing){
+    const r=document.createElement('div');
+    r.className='radar-ring';r.style.background=map.col;ring.appendChild(r);
+  } else if(!map.ring&&existing){
+    existing.remove();
+  }
+}
+
+function startGPS(silent=false){
+  if(!navigator.geolocation){
+    if(!silent) showGpsAlert('GPS ma taageero browser-kaaga','err');
+    setRadar('error'); return;
+  }
+  setRadar('tracking');
+  document.getElementById('gpsAlert').innerHTML='';
+  if(watchId) navigator.geolocation.clearWatch(watchId);
+
+  watchId=navigator.geolocation.watchPosition(
+    pos=>{
+      const s={
+        lat:pos.coords.latitude,lng:pos.coords.longitude,
+        accuracy:Math.round(pos.coords.accuracy),
+        altitude:pos.coords.altitude!=null?Math.round(pos.coords.altitude):null,
+        speed:pos.coords.speed,heading:pos.coords.heading,
+      };
+      currentSnap={...s,ts:new Date().toISOString()};
+      DB.saveSnap(currentUser.email,currentSnap);
+      document.getElementById('gpsBody').innerHTML=renderGpsBody();
+      setRadar('ok');
+    },
+    err=>{
+      setRadar('error');
+      if(!silent){
+        const msgs={1:'GPS oggolaanshaha la diiday — Settings > Location hubi',2:'Goobta la heli kari waayo',3:'Wakhtiga ayaa dhamaatay'};
+        showGpsAlert(msgs[err.code]||'GPS khalad','err');
+      }
+    },
+    {enableHighAccuracy:true,timeout:15000,maximumAge:5000}
+  );
+}
+
+function showGpsAlert(msg,type){
+  const el=document.getElementById('gpsAlert');
+  if(el) el.innerHTML=alert2(msg,type);
+}
+
+async function loadDeviceInfo(){
+  currentDevInfo=await gatherDeviceInfo();
+  renderNetBody();
+  renderDevBody();
+}
+
+function reloadDevInfo(){ loadDeviceInfo(); }
+
+function toggleAuto(){
+  autoOn=!autoOn;
+  const btn=document.getElementById('autoBtn');
+  if(autoOn){
+    btn.textContent='⏹ JOOJI AUTO';
+    btn.style.color='var(--danger)';
+    autoTimer=setInterval(loadDeviceInfo,30000);
+  } else {
+    btn.textContent='▶ AUTO 30s';
+    btn.style.color='var(--muted)';
+    clearInterval(autoTimer);
+  }
+}
+
+function renderNetBody(){
+  const d=currentDevInfo;
+  if(!d){document.getElementById('netBody').innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center">Xog la helin</div>';return;}
+  document.getElementById('netBody').innerHTML=`
+    ${infoRow('Xaalada Internet',d.onLine?'✅ Online':'❌ Offline',d.onLine?'green':'danger')}
+    ${infoRow('Nooca Xiriirka',netLabel(d),'accent')}
+    ${infoRow('Xawaaraha Download',d.connection.downlink?d.connection.downlink+' Mbps':'—')}
+    ${infoRow('RTT Delay',d.connection.rtt?d.connection.rtt+'ms':'—')}
+    ${infoRow('Data Badbaadineed',d.connection.saveData?'✅ Haa':'❌ Maya')}
+    <div class="divider"></div>
+    ${infoRow('IP Address',d.ip||'La soo qaadayaa...','mono accent')}
+    ${infoRow('Shirkadda ISP',d.isp,'orange')}
+    ${infoRow('Magaalada',d.city)}
+    ${infoRow('Gobolka',d.region)}
+    ${infoRow('Dalka',d.country)}
+  `;
+}
+
+function renderDevBody(){
+  const d=currentDevInfo;
+  if(!d){document.getElementById('devBody').innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center">Xog la helin</div>';return;}
+  let batHtml='';
+  if(d.battery){
+    const bc=d.battery.level>50?'var(--green)':d.battery.level>20?'var(--orange)':'var(--danger)';
+    batHtml=`
+      <div class="bat-row">
+        <div class="bat-track"><div class="bat-fill" style="width:${d.battery.level}%;background:${bc}"></div></div>
+        <div class="bat-val" style="color:${bc}">${d.battery.charging?'⚡':'🔋'}${d.battery.level}%</div>
+      </div>
+      ${infoRow('Shidmis',d.battery.charging?'⚡ Shidmaya':'Shidmis ma jiro',d.battery.charging?'green':'muted')}
+      ${d.battery.dischargingTime>0&&d.battery.dischargingTime!==Infinity?infoRow('Wakhti Dhiman','~'+Math.round(d.battery.dischargingTime/60)+' daqiiqo','orange'):''}
+    `;
+  } else {
+    batHtml=infoRow('Baytariga','Browser-ka ma siin karo','muted');
+  }
+  document.getElementById('devBody').innerHTML=`
+    ${infoRow('Nooca Qalabka',d.deviceType)}
+    ${infoRow('Platform / OS',d.platform)}
+    ${infoRow('Browser',d.browser)}
+    ${infoRow('Luqadda',d.language)}
+    ${infoRow('Timezone',d.timezone)}
+    ${infoRow('Shaashadda',d.screenW+'×'+d.screenH+' · '+d.pixelRatio+'x')}
+    ${infoRow('Cookies',d.cookiesEnabled?'✅ Shiddan':'❌ Damis')}
+    <div class="divider"></div>
+    ${batHtml}
+  `;
+}
+
+let recoverOpen=false;
+function toggleRecover(){
+  recoverOpen=!recoverOpen;
+  document.getElementById('recoverPanel').style.display=recoverOpen?'block':'none';
+  document.getElementById('recoverToggleLabel').textContent=recoverOpen?'▲ Xir':'▼ Fur — Goobta Soo Qaad';
+}
+
+function doRecover(){
+  const email=(document.getElementById('recEmail').value||'').trim();
+  document.getElementById('recoverAlert').innerHTML='';
+  document.getElementById('recoverResult').innerHTML='';
+  if(!email)return document.getElementById('recoverAlert').innerHTML=alert2('Emailkaaga geli');
+  const u=DB.find(email);
+  if(!u)return document.getElementById('recoverAlert').innerHTML=alert2('Qof laga helin email-kan');
+  const s=DB.getSnap(email);
+  if(!s)return document.getElementById('recoverAlert').innerHTML=alert2('Goob la kaydiyey kuma jirto. Qofku app-ka ayuu u baahan yahay inuu fur.');
+  document.getElementById('recoverResult').innerHTML=`
+    <div class="recover-result">
+      <div style="font-family:'Rajdhani',sans-serif;font-weight:700;color:var(--danger);font-size:13px;letter-spacing:1px;margin-bottom:12px">📱 TELEFOON LA HELAY</div>
+      ${infoRow('Magac',u.name)}
+      ${infoRow('Nambarka SIM',u.phone,'green')}
+      ${infoRow('Wakhtiga Dambe',fmt(s.ts),'accent')}
+      <div class="recover-gps">
+        <div class="rk">📍 GPS GOOBTA</div>
+        <div class="rv">${s.lat.toFixed(7)}, ${s.lng.toFixed(7)}</div>
+        <div class="ra">Saxnaan: ±${s.accuracy}m</div>
+      </div>
+      <div class="map-btns">
+        <a class="map-btn gmap" href="https://www.google.com/maps?q=${s.lat},${s.lng}" target="_blank">🗺️ Google Maps</a>
+        <a class="map-btn amap" href="https://maps.apple.com/?q=${s.lat},${s.lng}" target="_blank">🍎 Apple Maps</a>
+      </div>
+    </div>`;
+}
+
+function logout(){
+  currentUser=null;currentSnap=null;currentDevInfo=null;
+  if(watchId){navigator.geolocation.clearWatch(watchId);watchId=null;}
+  if(autoTimer){clearInterval(autoTimer);autoTimer=null;}autoOn=false;
+  document.getElementById('dashboard').style.display='none';
+  document.getElementById('logoutBtn').style.display='none';
+  page='login';renderAuth();
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+renderAuth();
+</script>
+</body>
+</html>
